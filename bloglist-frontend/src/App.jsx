@@ -11,6 +11,7 @@ const App = () => {
   const [user, setUser] = useState(null);
   const [blogs, setBlogs] = useState([])
   const [errorMessage, setErrorMessage] = useState(null);
+  const [successMessage, setSuccessMessage] = useState(null);
   const [newBlog, setNewBlog] = useState({ title: '', author: '', url: '' });
 
   useEffect(() => {
@@ -26,6 +27,10 @@ const App = () => {
       fetchBlogs();
     }
   }, [user]); // Depend on user for token updates
+
+  const Notification = ({ message, type = 'error' }) => (
+    message && <div style={{ color: type === 'error' ? 'red' : 'green', padding: '10px' }}>{message}</div>
+  );
 
   const handleLogin = async (event) => {
     event.preventDefault();
@@ -63,6 +68,8 @@ const App = () => {
       const blog = await blogService.create(newBlog);
       setBlogs(blogs.concat(blog));
       setNewBlog({ title: '', author: '', url: '' }); // Clear form
+      setSuccessMessage(`a new blog, ${newBlog.title} by ${newBlog.author} added`);
+      setTimeout(() => setSuccessMessage(null), 5000);
     } catch (error) {
       setErrorMessage(error.response?.data?.error || 'Error creating blog');
       setTimeout(() => setErrorMessage(null), 5000);
@@ -72,6 +79,7 @@ const App = () => {
 
   const loginForm = () => (
     <div>
+      <Notification message={errorMessage} type="error" />
       <h2>Log in to application</h2>
       <form onSubmit={handleLogin}>
         <div>
@@ -92,7 +100,6 @@ const App = () => {
         </div>
         <button type="submit">login</button>
       </form>
-      {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
     </div>
   );
 
@@ -129,19 +136,21 @@ const App = () => {
     </div>
   );
 
+
   if (user === null) {
     return loginForm();
   }
 
   return (
-    <div>
-    <h2>blogs</h2>
-    <p>{user.name} logged in</p>
-    <button onClick={handleLogout}>Logout</button>
-    {blogForm()}
-    {blogs.map(blog => (
-      <Blog key={blog.id} blog={blog} />
-    ))}
+  <div>
+      <Notification message={successMessage} type="success" />
+      <h2>blogs</h2>
+      <p>{user.name} logged in</p>
+      <button onClick={handleLogout}>Logout</button>
+      {blogForm()}
+      {blogs.map(blog => (
+        <Blog key={blog.id} blog={blog} />
+      ))}
   </div>
   )
 }
