@@ -1,4 +1,4 @@
-// middleware/userExtractor.js
+// Fullstack_Part4/middleware/userExtractor.js
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 

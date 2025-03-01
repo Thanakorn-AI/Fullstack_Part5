@@ -87,8 +87,10 @@ const App = () => {
     setBlogs(blogs.map(blog => blog.id === updatedBlog.id ? updatedBlog : blog));
   };
 
-  const deleteBlog = (id) => {
-    setBlogs(blogs.filter(blog => blog.id !== id));
+  const deleteBlog = async (id) => {
+    await blogService.remove(id); // Use updated remove
+    const updatedBlogs = await blogService.getAll(); // Refetch all blogs
+    setBlogs(updatedBlogs);
   };
 
 

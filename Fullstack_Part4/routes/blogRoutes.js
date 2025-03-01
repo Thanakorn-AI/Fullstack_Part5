@@ -1,7 +1,7 @@
 // Fullstack_Part4/routes/blogRoutes.js
 const express = require('express');
 const router = express.Router();
-
+const userExtractor = require('../middleware/userExtractor');
 const Blog = require('../models/blog');
 const User = require('../models/user');
 const jwt = require('jsonwebtoken');
@@ -56,17 +56,16 @@ router.post('/', async (request, response) => {
 });
 
 
-router.delete('/:id', async (request, response) => {
-  const decodedToken = jwt.verify(getTokenFrom(request), process.env.SECRET);
-  if (!decodedToken.id) {
-    return response.status(401).json({ error: 'token invalid' });
-  }
-  const user = await User.findById(decodedToken.id);
+router.delete('/:id', userExtractor, async (request, response) => { // Add userExtractor
+  const user = request.user; // Use user from middleware
   const blog = await Blog.findById(request.params.id);
-  if (blog.user.toString() !== user._id.toString()) {
+  if (!blog) {
+    return response.status(404).json({ error: 'Blog not found' });
+  }
+  if (blog.user._id.toString() !== user._id.toString()) {
     return response.status(401).json({ error: 'unauthorized' });
   }
-  await Blog.findByIdAndRemove(request.params.id);
+  await Blog.findByIdAndDelete(request.params.id);
   response.status(204).end();
 });
 
