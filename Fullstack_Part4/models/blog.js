@@ -1,4 +1,4 @@
-// models/blog.js
+// Fullstack_Part4/models/blog.js
 const mongoose = require('mongoose');
 
 const blogSchema = new mongoose.Schema({

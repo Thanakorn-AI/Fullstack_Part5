@@ -1,10 +1,20 @@
-// routes/blogRoutes.js
+// Fullstack_Part4/routes/blogRoutes.js
 const express = require('express');
-const jwt = require('jsonwebtoken');
+const router = express.Router();
+
 const Blog = require('../models/blog');
 const User = require('../models/user');
+const jwt = require('jsonwebtoken');
 
-const router = express.Router();
+
+const getTokenFrom = request => {
+  const authorization = request.get('authorization');
+  if (authorization && authorization.startsWith('Bearer ')) {
+    return authorization.replace('Bearer ', '');
+  }
+  return null;
+};
+
 
 router.get('/', async (request, response) => {
   try {
@@ -18,7 +28,11 @@ router.get('/', async (request, response) => {
 
 router.post('/', async (request, response) => {
   try {
-    const user = request.user; // User from userExtractor middleware
+    const decodedToken = jwt.verify(getTokenFrom(request), process.env.SECRET);
+    if (!decodedToken.id) {
+      return response.status(401).json({ error: 'token invalid' });
+    }
+    const user = await User.findById(decodedToken.id);
     const { title, author, url, likes } = request.body;
 
     const blog = new Blog({
@@ -33,43 +47,45 @@ router.post('/', async (request, response) => {
 
     user.blogs = user.blogs.concat(savedBlog._id);
     await user.save();
+    response.status(201).json(await Blog.findById(savedBlog._id).populate('user', { username: 1, name: 1 }));
 
-    response.status(201).json(savedBlog);
   } catch (error) {
     console.error('Error saving blog:', error);
     response.status(400).json({ error: 'Error saving the blog' });
   }
 });
 
+
 router.delete('/:id', async (request, response) => {
-  try {
-    const user = request.user; // User from userExtractor middleware
-    const blog = await Blog.findById(request.params.id);
-    if (!blog) {
-      return response.status(404).json({ error: 'blog not found' });
-    }
-
-    if (blog.user.toString() !== user._id.toString()) {
-      return response.status(403).json({ error: 'only the creator can delete this blog' });
-    }
-
-    await Blog.findByIdAndDelete(request.params.id);
-    response.status(204).end();
-  } catch (error) {
-    console.error('Error deleting blog:', error);
-    response.status(500).json({ error: 'error deleting the blog' });
+  const decodedToken = jwt.verify(getTokenFrom(request), process.env.SECRET);
+  if (!decodedToken.id) {
+    return response.status(401).json({ error: 'token invalid' });
   }
+  const user = await User.findById(decodedToken.id);
+  const blog = await Blog.findById(request.params.id);
+  if (blog.user.toString() !== user._id.toString()) {
+    return response.status(401).json({ error: 'unauthorized' });
+  }
+  await Blog.findByIdAndRemove(request.params.id);
+  response.status(204).end();
 });
 
 
-// New PUT route (Update likes)
+
+// New PUT route (Update all fields)
 router.put('/:id', async (request, response) => {
   try {
+    const blog = request.body;
+    const decodedToken = jwt.verify(getTokenFrom(request), process.env.SECRET);
+    if (!decodedToken.id) {
+      return response.status(401).json({ error: 'token invalid' });
+    }
+
     const updatedBlog = await Blog.findByIdAndUpdate(
       request.params.id,
-      { likes: request.body.likes }, // Focus on updating likes
+      blog, // Update all fields (title, author, url, likes, user)
       { new: true, runValidators: true }
-    );
+    ).populate('user', { username: 1, name: 1 }); // Populate user for frontend
     if (!updatedBlog) {
       return response.status(404).json({ error: 'Blog not found' });
     }
@@ -79,5 +95,8 @@ router.put('/:id', async (request, response) => {
     response.status(400).json({ error: 'Error updating the blog' });
   }
 });
+
+
+
 
 module.exports = router;
