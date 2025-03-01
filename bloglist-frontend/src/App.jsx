@@ -1,11 +1,17 @@
 // bloglist-frontend/src/App.jsx
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Blog from './components/Blog'
 import blogService from './services/blogs'
 import loginService from './services/login';
 import noteService from './services/blogs';
+import Togglable from './components/Togglable';
+
+
+
 
 const App = () => {
+  const blogFormRef = useRef(); 
+
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [user, setUser] = useState(null);
@@ -13,6 +19,7 @@ const App = () => {
   const [errorMessage, setErrorMessage] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
   const [newBlog, setNewBlog] = useState({ title: '', author: '', url: '' });
+  
 
   useEffect(() => {
     const fetchBlogs = async () => {
@@ -70,6 +77,8 @@ const App = () => {
       setNewBlog({ title: '', author: '', url: '' }); // Clear form
       setSuccessMessage(`a new blog, ${newBlog.title} by ${newBlog.author} added`);
       setTimeout(() => setSuccessMessage(null), 5000);
+      // Hide form using Togglable ref
+      blogFormRef.current.toggleVisibility(); // Need blogFormRef from Step 4
     } catch (error) {
       setErrorMessage(error.response?.data?.error || 'Error creating blog');
       setTimeout(() => setErrorMessage(null), 5000);
@@ -144,10 +153,12 @@ const App = () => {
   return (
   <div>
       <Notification message={successMessage} type="success" />
-      <h2>blogs</h2>
+      <h2>Blogs</h2>
       <p>{user.name} logged in</p>
       <button onClick={handleLogout}>Logout</button>
+      <Togglable buttonLabel="create new blog" ref={blogFormRef}>
       {blogForm()}
+      </Togglable>
       {blogs.map(blog => (
         <Blog key={blog.id} blog={blog} />
       ))}
