@@ -34,10 +34,26 @@ const App = () => {
       setUsername('');
       setPassword('');
       noteService.setToken(user.token);
+      window.localStorage.setItem('loggedNoteappUser', JSON.stringify(user));
     } catch (exception) {
       setErrorMessage(exception.response?.data?.error || 'Wrong credentials');
       setTimeout(() => setErrorMessage(null), 5000);
     }
+  };
+
+  useEffect(() => {
+    const loggedUserJSON = window.localStorage.getItem('loggedNoteappUser');
+    if (loggedUserJSON) {
+      const user = JSON.parse(loggedUserJSON);
+      setUser(user);
+      noteService.setToken(user.token);
+    }
+  }, []);
+
+  const handleLogout = () => {
+    window.localStorage.removeItem('loggedNoteappUser');
+    setUser(null);
+    noteService.setToken(null); // Clear token
   };
 
   const loginForm = () => (
@@ -74,6 +90,7 @@ const App = () => {
     <div>
     <h2>blogs</h2>
     <p>{user.name} logged in</p>
+    <button onClick={handleLogout}>Logout</button>
     {blogs.map(blog => (
       <Blog key={blog.id} blog={blog} />
     ))}
