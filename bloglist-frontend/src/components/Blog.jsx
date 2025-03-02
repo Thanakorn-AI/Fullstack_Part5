@@ -1,7 +1,8 @@
 // bloglist-frontend/src/components/Blog.jsx
 import { useState } from 'react'
-import blogService from '../services/blogs'
 import PropTypes from 'prop-types'
+
+
 
 const Blog = ({ blog, updateBlog, deleteBlog, user }) => {
   const [visible, setVisible] = useState(false)
@@ -20,8 +21,7 @@ const Blog = ({ blog, updateBlog, deleteBlog, user }) => {
       likes: blog.likes + 1,
       user: blog.user.id // Send user as ID for backend
     }
-    const returnedBlog = await blogService.update(blog.id, updatedBlog)
-    updateBlog(returnedBlog) // Update App’s state
+    await updateBlog(blog.id, updatedBlog)
   }
 
   const handleDelete = () => {
@@ -34,14 +34,14 @@ const Blog = ({ blog, updateBlog, deleteBlog, user }) => {
 
   return (
     <div style={blogStyle}>
-      <div>
+      <div className="blogTitle">
         {blog.title} {blog.author}
         <button onClick={() => setVisible(!visible)}>
           {visible ? 'hide' : 'view'}
         </button>
       </div>
       {visible && (
-        <div>
+        <div className="blogDetails">
           <p>URL: {blog.url}</p>
           <p>Likes: {blog.likes} <button onClick={handleLike}>like</button></p>
           <p>User: {blog.user.name}</p>

@@ -13,4 +13,9 @@ export default defineConfig({
       },
     },
   },
+  test: {
+    environment: 'jsdom', // Use jsdom to simulate browser
+    globals: true, // No need to import test keywords (describe, test, expect)
+    setupFiles: './testSetup.js', // Load test setup
+  }
 })
