@@ -1,14 +1,15 @@
 // bloglist-frontend/src/components/BlogForm.jsx
-import { useState } from 'react';
+import { useState } from 'react'
+import PropTypes from 'prop-types'
 
 const BlogForm = ({ createBlog }) => {
-  const [newBlog, setNewBlog] = useState({ title: '', author: '', url: '' });
+  const [newBlog, setNewBlog] = useState({ title: '', author: '', url: '' })
 
   const handleBlogSubmit = (event) => {
-    event.preventDefault();
-    createBlog(newBlog);
-    setNewBlog({ title: '', author: '', url: '' }); // Clear form
-  };
+    event.preventDefault()
+    createBlog(newBlog)
+    setNewBlog({ title: '', author: '', url: '' }) // Clear form
+  }
 
   return (
     <div>
@@ -41,7 +42,11 @@ const BlogForm = ({ createBlog }) => {
         <button type="submit">create</button>
       </form>
     </div>
-  );
-};
+  )
+}
 
-export default BlogForm;
+BlogForm.propTypes = {
+  createBlog: PropTypes.func.isRequired,
+}
+
+export default BlogForm

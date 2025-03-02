@@ -2,96 +2,103 @@
 import { useState, useEffect, useRef } from 'react'
 import Blog from './components/Blog'
 import blogService from './services/blogs'
-import loginService from './services/login';
-import noteService from './services/blogs';
-import Togglable from './components/Togglable';
-import BlogForm from './components/BlogForm';
-
+import loginService from './services/login'
+import noteService from './services/blogs'
+import Togglable from './components/Togglable'
+import BlogForm from './components/BlogForm'
+import PropTypes from 'prop-types'
 
 
 const App = () => {
-  const blogFormRef = useRef(); 
+  const blogFormRef = useRef()
 
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [user, setUser] = useState(null);
+  const [username, setUsername] = useState('')
+  const [password, setPassword] = useState('')
+  const [user, setUser] = useState(null)
   const [blogs, setBlogs] = useState([])
-  const [errorMessage, setErrorMessage] = useState(null);
-  const [successMessage, setSuccessMessage] = useState(null);
-  
+  const [errorMessage, setErrorMessage] = useState(null)
+  const [successMessage, setSuccessMessage] = useState(null)
+
 
   useEffect(() => {
     const fetchBlogs = async () => {
       try {
-        const blogs = await blogService.getAll();
-        setBlogs(blogs);
+        const blogs = await blogService.getAll()
+        setBlogs(blogs)
       } catch (error) {
-        console.error('Error fetching blogs:', error);
+        console.error('Error fetching blogs:', error)
       }
-    };
-    if (user) { // Only fetch if logged in (has token)
-      fetchBlogs();
     }
-  }, [user]); // Depend on user for token updates
+    if (user) { // Only fetch if logged in (has token)
+      fetchBlogs()
+    }
+  }, [user]) // Depend on user for token updates
 
   const Notification = ({ message, type = 'error' }) => (
     message && <div style={{ color: type === 'error' ? 'red' : 'green', padding: '10px' }}>{message}</div>
-  );
+  )
+
+
+  Notification.propTypes = {
+    message: PropTypes.string.isRequired,
+    type: PropTypes.oneOf(['error', 'success']).isRequired,
+  }
+
 
   const handleLogin = async (event) => {
-    event.preventDefault();
+    event.preventDefault()
     try {
-      const user = await loginService.login({ username, password });
-      setUser(user); // Save token and user details
-      setUsername('');
-      setPassword('');
-      noteService.setToken(user.token);
-      window.localStorage.setItem('loggedNoteappUser', JSON.stringify(user));
+      const user = await loginService.login({ username, password })
+      setUser(user) // Save token and user details
+      setUsername('')
+      setPassword('')
+      noteService.setToken(user.token)
+      window.localStorage.setItem('loggedNoteappUser', JSON.stringify(user))
     } catch (exception) {
-      setErrorMessage(exception.response?.data?.error || 'Wrong credentials');
-      setTimeout(() => setErrorMessage(null), 5000);
+      setErrorMessage(exception.response?.data?.error || 'Wrong credentials')
+      setTimeout(() => setErrorMessage(null), 5000)
     }
-  };
+  }
 
   useEffect(() => {
-    const loggedUserJSON = window.localStorage.getItem('loggedNoteappUser');
+    const loggedUserJSON = window.localStorage.getItem('loggedNoteappUser')
     if (loggedUserJSON) {
-      const user = JSON.parse(loggedUserJSON);
-      setUser(user);
-      noteService.setToken(user.token);
+      const user = JSON.parse(loggedUserJSON)
+      setUser(user)
+      noteService.setToken(user.token)
     }
-  }, []);
+  }, [])
 
   const handleLogout = () => {
-    window.localStorage.removeItem('loggedNoteappUser');
-    setUser(null);
-    noteService.setToken(null); // Clear token
-  };
+    window.localStorage.removeItem('loggedNoteappUser')
+    setUser(null)
+    noteService.setToken(null) // Clear token
+  }
 
 
   const createBlog = async (blogObject) => {
     try {
-      const blog = await blogService.create(blogObject);
-      setBlogs(blogs.concat(blog));
-      setSuccessMessage(`a new blog ${blogObject.title} by ${blogObject.author} added`);
-      setTimeout(() => setSuccessMessage(null), 5000);
-      blogFormRef.current.toggleVisibility(); // Hide form after creation
+      const blog = await blogService.create(blogObject)
+      setBlogs(blogs.concat(blog))
+      setSuccessMessage(`a new blog ${blogObject.title} by ${blogObject.author} added`)
+      setTimeout(() => setSuccessMessage(null), 5000)
+      blogFormRef.current.toggleVisibility() // Hide form after creation
     } catch (error) {
-      setErrorMessage(error.response?.data?.error || 'Error creating blog');
-      setTimeout(() => setErrorMessage(null), 5000);
+      setErrorMessage(error.response?.data?.error || 'Error creating blog')
+      setTimeout(() => setErrorMessage(null), 5000)
     }
-  };
+  }
 
 
   const updateBlog = (updatedBlog) => {
-    setBlogs(blogs.map(blog => blog.id === updatedBlog.id ? updatedBlog : blog));
-  };
+    setBlogs(blogs.map(blog => blog.id === updatedBlog.id ? updatedBlog : blog))
+  }
 
   const deleteBlog = async (id) => {
-    await blogService.remove(id); // Use updated remove
-    const updatedBlogs = await blogService.getAll(); // Refetch all blogs
-    setBlogs(updatedBlogs);
-  };
+    await blogService.remove(id) // Use updated remove
+    const updatedBlogs = await blogService.getAll() // Refetch all blogs
+    setBlogs(updatedBlogs)
+  }
 
 
   const loginForm = () => (
@@ -118,18 +125,18 @@ const App = () => {
         <button type="submit">login</button>
       </form>
     </div>
-  );
+  )
 
 
   if (user === null) {
-    return loginForm();
+    return loginForm()
   }
 
   // Sort blogs by likes (descending) before rendering
-  const sortedBlogs = [...blogs].sort((a, b) => b.likes - a.likes);
+  const sortedBlogs = [...blogs].sort((a, b) => b.likes - a.likes)
 
   return (
-  <div>
+    <div>
       <Notification message={successMessage} type="success" />
       <h2>Blogs</h2>
       <p>{user.name} logged in</p>
@@ -140,7 +147,7 @@ const App = () => {
       {sortedBlogs.map(blog => (
         <Blog key={blog.id} blog={blog} updateBlog={updateBlog} deleteBlog={deleteBlog} user={user} />
       ))}
-  </div>
+    </div>
   )
 }
 
