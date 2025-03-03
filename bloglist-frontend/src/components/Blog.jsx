@@ -32,18 +32,18 @@ const Blog = ({ blog, updateBlog, deleteBlog, user }) => {
 
   return (
     <div style={blogStyle}>
-      <div className="blogTitle">
+      <div className="blogTitle" data-testid="blog-title">
         {blog.title} {blog.author}
-        <button onClick={() => setVisible(!visible)}>
+        <button onClick={() => setVisible(!visible)} data-testid="view-toggle">
           {visible ? 'hide' : 'view'}
         </button>
       </div>
       {visible && (
-        <div className="blogDetails">
+        <div className="blogDetails" data-testid="blog-details">
           <p>URL: {blog.url}</p>
-          <p>Likes: {blog.likes} <button onClick={handleLike}>like</button></p>
+          <p>Likes: {blog.likes} <button onClick={handleLike} data-testid="like-button">like</button></p>
           <p>User: {blog.user.name}</p>
-          {showDeleteButton && <button onClick={handleDelete}>delete</button>}
+          {showDeleteButton && <button onClick={handleDelete} data-testid="delete-button">delete</button>}
         </div>
       )}
     </div>

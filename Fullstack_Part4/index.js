@@ -3,6 +3,10 @@ require('dotenv').config();
 const app = require('./app');
 const mongoose = require('mongoose');
 const config = require('./utils/config');
+const loginRouter = require('./routes/login');
+const usersRouter = require('./routes/users');
+const blogsRouter = require('./routes/blogRoutes');
+const middleware = require('./utils/middleware');
 
 
 mongoose.connect(config.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })

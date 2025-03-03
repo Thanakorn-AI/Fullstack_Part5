@@ -1,9 +1,9 @@
 // bloglist-e2e/tests/helper.js
 const loginWith = async (page, username, password) => {
-    await page.getByRole('button', { name: 'log in' }).click();
-    await page.getByRole('textbox').first().fill(username);
-    await page.getByRole('textbox').last().fill(password);
-    await page.getByRole('button', { name: 'login' }).click();
+    await page.getByTestId('login-button').click();
+    await page.getByTestId('username').fill(username);
+    await page.getByTestId('password').fill(password);
+    await page.getByTestId('login-button').click();
   };
   
   const createBlog = async (page, title, author, url) => {
@@ -12,7 +12,7 @@ const loginWith = async (page, username, password) => {
     await page.getByPlaceholderText('Enter author').fill(author);
     await page.getByPlaceholderText('Enter URL').fill(url);
     await page.getByRole('button', { name: 'create' }).click();
-    await page.getByText(`${title} ${author}`).waitFor();
+    await page.getByTestId('blog-title').filter({ hasText: `${title} ${author}` }).waitFor();
   };
   
   module.exports = { loginWith, createBlog };

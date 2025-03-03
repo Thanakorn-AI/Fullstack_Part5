@@ -102,7 +102,7 @@ const App = () => {
 
 
   const loginForm = () => (
-    <div>
+    <div data-testid="login-form">
       <Notification message={errorMessage} type="error" />
       <h2>Log in to application</h2>
       <form onSubmit={handleLogin}>
@@ -112,6 +112,7 @@ const App = () => {
             type="text"
             value={username}
             onChange={({ target }) => setUsername(target.value)}
+            data-testid="username"
           />
         </div>
         <div>
@@ -120,9 +121,10 @@ const App = () => {
             type="password"
             value={password}
             onChange={({ target }) => setPassword(target.value)}
+            data-testid="password"
           />
         </div>
-        <button type="submit">login</button>
+        <button type="submit" data-testid="login-button">login</button>
       </form>
     </div>
   )
