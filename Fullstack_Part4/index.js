@@ -1,4 +1,4 @@
-// bloglist-app/index.js
+// Fullstack_Part4/index.js
 require('dotenv').config();
 const app = require('./app');
 const mongoose = require('mongoose');

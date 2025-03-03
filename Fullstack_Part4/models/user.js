@@ -1,4 +1,4 @@
-// models/user.js
+// Fullstack_Part4/models/user.js
 const mongoose = require('mongoose');
 
 
