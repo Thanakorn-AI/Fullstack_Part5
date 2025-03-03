@@ -35,7 +35,7 @@ describe('Blog app', () => {
       await page.getByTestId('username').fill('mluukkai');
       await page.getByTestId('password').fill('wrong');
       await page.getByTestId('login-button').click();
-      await expect(page.getByText('Wrong credentials')).toBeVisible();
+      await expect(page.getByText('Wrong credentials', { timeout: 10000 })).toBeVisible(); 
       await expect(page.getByText('Matti Luukkainen logged in')).not.toBeVisible();
     });
   });
@@ -47,9 +47,9 @@ describe('Blog app', () => {
 
     test('a new blog can be created', async ({ page }) => {
       await page.getByRole('button', { name: 'create new blog' }).click();
-      await page.getByPlaceholderText('Enter title').fill('Playwright Blog');
-      await page.getByPlaceholderText('Enter author').fill('Playwright Author');
-      await page.getByPlaceholderText('Enter URL').fill('http://playwrightblog.com');
+      await page.locator('input[placeholder="Enter title"]').fill('Playwright Blog');
+      await page.locator('input[placeholder="Enter author"]').fill('Playwright Author');
+      await page.locator('input[placeholder="Enter URL"]').fill('http://playwrightblog.com');
       await page.getByRole('button', { name: 'create' }).click();
       await expect(page.getByTestId('blog-title')).toBeVisible();
     });

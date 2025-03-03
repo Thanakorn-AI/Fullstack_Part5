@@ -9,10 +9,9 @@ test('submits new blog with correct details', async () => {
   const user = userEvent.setup()
 
   render(<BlogForm createBlog={createBlog} />)
-
-  const titleInput = screen.getByPlaceholderText('Enter title')
-  const authorInput = screen.getByPlaceholderText('Enter author')
-  const urlInput = screen.getByPlaceholderText('Enter URL')
+  const titleInput = screen.page.locator('input[placeholder="Enter title"]')
+  const authorInput = screen.page.locator('input[placeholder="Enter author"]')
+  const urlInput = screen.page.locator('input[placeholder="Enter URL"]')
   const createButton = screen.getByText('create')
 
   await user.type(titleInput, 'Test Blog')
