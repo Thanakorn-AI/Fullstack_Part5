@@ -39,7 +39,7 @@ const App = () => {
 
 
   Notification.propTypes = {
-    message: PropTypes.string.isRequired,
+    message: PropTypes.string,
     type: PropTypes.oneOf(['error', 'success']).isRequired,
   }
 

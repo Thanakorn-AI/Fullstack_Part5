@@ -20,9 +20,9 @@ const create = async newObject => {
   return response.data
 }
 
-const update = async (id, blogObject) => {
+const update = async (id, updatedBlog) => {
   const config = { headers: { Authorization: token } }
-  const response = await axios.put(`${baseUrl}/${id}`, blogObject, config)
+  const response = await axios.put(`${baseUrl}/${id}`, updatedBlog, config)
   // Fetch full blog with populated user to ensure name
   return response.data
 }
