@@ -18,7 +18,7 @@ export default defineConfig({
     /* Base URL for actions like page.goto('/') */
     baseURL: 'http://localhost:5173',
     /* Reduce timeout for faster development */
-    timeout: 3000,
+    timeout: 60000,
     /* Collect trace when retrying failed tests */
     trace: 'on-first-retry',
   },

@@ -35,7 +35,7 @@ const App = () => {
   }, [user]) // Depend on user for token updates
 
   const Notification = ({ message, type = 'error' }) => (
-    message && <div style={{ color: type === 'error' ? 'red' : 'green', padding: '10px' }}>{message}</div>
+    message && <div data-testid="error-message" style={{ color: type === 'error' ? 'red' : 'green', padding: '10px' }}>{message}</div>
   )
 
 

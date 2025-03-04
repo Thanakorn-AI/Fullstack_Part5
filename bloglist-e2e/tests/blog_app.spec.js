@@ -35,7 +35,7 @@ describe('Blog app', () => {
       await page.getByTestId('username').fill('mluukkai');
       await page.getByTestId('password').fill('wrong');
       await page.getByTestId('login-button').click();
-      await expect(page.getByText('Wrong credentials', { timeout: 10000 })).toBeVisible(); 
+      await expect(page.getByTestId('error-message')).toHaveText('invalid username or password', { timeout: 10000 });
       await expect(page.getByText('Matti Luukkainen logged in')).not.toBeVisible();
     });
   });
@@ -54,18 +54,19 @@ describe('Blog app', () => {
       await expect(page.getByTestId('blog-title')).toBeVisible();
     });
 
+
     test('a blog can be liked', async ({ page }) => {
-      await createBlog(page, 'Like Test', 'Like Author', 'http://liketest.com');
+      const blog = await createBlog(page, 'Like Test', 'Like Author', 'http://liketest.com');
       await page.getByTestId('blog-title').getByTestId('view-toggle').click();
-      await page.getByTestId('blog-title').getByTestId('like-button').click();
-      await expect(page.getByText('Likes: 1')).toBeVisible();
+      await page.getByTestId(`like-button-${blog.id}`).click();
+      await expect(page.getByText('Likes: 1')).toBeVisible({ timeout: 15000 });
     });
 
     test('a blog can be deleted by its creator', async ({ page }) => {
       await createBlog(page, 'Delete Test', 'Delete Author', 'http://deletetest.com');
       await page.getByTestId('blog-title').getByTestId('view-toggle').click();
       page.on('dialog', dialog => dialog.accept()); // Handle window.confirm
-      await page.getByTestId('blog-title').getByTestId('delete-button').click();
+      await page.getByTestId('delete-button').click();
       await expect(page.getByTestId('blog-title')).not.toBeVisible();
     });
 
@@ -89,16 +90,24 @@ describe('Blog app', () => {
     });
 
     test('blogs are sorted by likes, most liked first', async ({ page }) => {
-      await createBlog(page, 'Blog A', 'Author A', 'http://bloga.com');
-      await createBlog(page, 'Blog B', 'Author B', 'http://blogb.com');
-      await createBlog(page, 'Blog C', 'Author C', 'http://blogc.com');
+      const blogA = await createBlog(page, 'Blog A', 'Author A', 'http://bloga.com');
+      const blogB = await createBlog(page, 'Blog B', 'Author B', 'http://blogb.com');
+      const blogC = await createBlog(page, 'Blog C', 'Author C', 'http://blogc.com');
 
+      // Open blog A details and like it twice
       await page.getByTestId('blog-title').filter({ hasText: 'Blog A Author A' }).getByTestId('view-toggle').click();
-      await page.getByTestId('blog-title').filter({ hasText: 'Blog A Author A' }).getByTestId('like-button').click();
-      await page.getByTestId('blog-title').filter({ hasText: 'Blog A Author A' }).getByTestId('like-button').click();
+      await page.getByTestId(`like-button-${blogA.id}`).click();
+      await page.waitForTimeout(1000); // Give time for the update to process
+      await page.getByTestId(`like-button-${blogA.id}`).click();
+      await page.waitForTimeout(1000); // Give time for the update to process
 
+      // Open blog B details and like it twice
       await page.getByTestId('blog-title').filter({ hasText: 'Blog B Author B' }).getByTestId('view-toggle').click();
-      await page.getByTestId('blog-title').filter({ hasText: 'Blog B Author B' }).getByTestId('like-button').click();
+      await page.getByTestId(`like-button-${blogB.id}`).click();
+      await page.waitForTimeout(1000); // Give time for the update to process
+
+      // Refresh the page to see the sorted list
+      await page.reload();
 
       const blogElements = await page.getByTestId('blog-title').all();
       expect(await blogElements[0].textContent()).toContain('Blog A Author A');

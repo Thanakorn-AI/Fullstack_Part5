@@ -41,7 +41,7 @@ const Blog = ({ blog, updateBlog, deleteBlog, user }) => {
       {visible && (
         <div className="blogDetails" data-testid="blog-details">
           <p>URL: {blog.url}</p>
-          <p>Likes: {blog.likes} <button onClick={handleLike} data-testid="like-button">like</button></p>
+          <p>Likes: {blog.likes} <button onClick={handleLike} data-testid={`like-button-${blog.id}`}>like</button></p>
           <p>User: {blog.user.name}</p>
           {showDeleteButton && <button onClick={handleDelete} data-testid="delete-button">delete</button>}
         </div>
