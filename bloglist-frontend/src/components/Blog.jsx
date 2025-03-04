@@ -14,12 +14,16 @@ const Blog = ({ blog, updateBlog, deleteBlog, user }) => {
   }
 
   const handleLike = async () => {
-    const updatedBlog = {
-      ...blog,
-      likes: blog.likes + 1,
-      user: blog.user.id // Send user as ID for backend
+    try {
+      const updatedBlog = {
+        ...blog,
+        likes: blog.likes + 1,
+        user: blog.user.id
+      }
+      await updateBlog(blog.id, updatedBlog)
+    } catch (error) {
+      console.error('Error updating likes:', error)
     }
-    await updateBlog(blog.id, updatedBlog)
   }
 
   const handleDelete = () => {

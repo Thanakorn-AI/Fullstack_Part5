@@ -82,7 +82,7 @@ router.put('/:id', async (request, response) => {
 
     const updatedBlog = await Blog.findByIdAndUpdate(
       request.params.id,
-      blog, // Update all fields (title, author, url, likes, user)
+      { likes: blog.likes, ...blog },
       { new: true, runValidators: true }
     ).populate('user', { username: 1, name: 1 }); // Populate user for frontend
     if (!updatedBlog) {

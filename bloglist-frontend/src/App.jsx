@@ -3,7 +3,6 @@ import { useState, useEffect, useRef } from 'react'
 import Blog from './components/Blog'
 import blogService from './services/blogs'
 import loginService from './services/login'
-import noteService from './services/blogs'
 import Togglable from './components/Togglable'
 import BlogForm from './components/BlogForm'
 import PropTypes from 'prop-types'
@@ -52,7 +51,7 @@ const App = () => {
       setUser(user) // Save token and user details
       setUsername('')
       setPassword('')
-      noteService.setToken(user.token)
+      blogService.setToken(user.token)
       window.localStorage.setItem('loggedNoteappUser', JSON.stringify(user))
     } catch (exception) {
       setErrorMessage(exception.response?.data?.error || 'Wrong credentials')
@@ -65,14 +64,14 @@ const App = () => {
     if (loggedUserJSON) {
       const user = JSON.parse(loggedUserJSON)
       setUser(user)
-      noteService.setToken(user.token)
+      blogService.setToken(user.token)
     }
   }, [])
 
   const handleLogout = () => {
     window.localStorage.removeItem('loggedNoteappUser')
     setUser(null)
-    noteService.setToken(null) // Clear token
+    blogService.setToken(null) // Clear token
   }
 
 
@@ -90,9 +89,16 @@ const App = () => {
   }
 
 
-  const updateBlog = (updatedBlog) => {
-    setBlogs(blogs.map(blog => blog.id === updatedBlog.id ? updatedBlog : blog))
-  }
+  const updateBlog = async (id, updatedBlog) => {
+    try {
+      const response = await blogService.update(id, updatedBlog);
+      setBlogs(blogs.map(blog => blog.id === id ? response : blog).sort((a, b) => b.likes - a.likes));
+    } catch (error) {
+      console.error('Error updating blog:', error);
+      setErrorMessage(error.response?.data?.error || 'Error updating blog');
+      setTimeout(() => setErrorMessage(null), 5000);
+    }
+  };
 
   const deleteBlog = async (id) => {
     await blogService.remove(id) // Use updated remove

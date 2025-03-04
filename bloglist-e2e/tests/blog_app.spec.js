@@ -58,9 +58,21 @@ describe('Blog app', () => {
     test('a blog can be liked', async ({ page }) => {
       const blog = await createBlog(page, 'Like Test', 'Like Author', 'http://liketest.com');
       await page.getByTestId('blog-title').getByTestId('view-toggle').click();
+
+      // Get the initial likes count
+      const initialLikesText = await page.getByText('Likes:', { exact: false }).textContent();
+
       await page.getByTestId(`like-button-${blog.id}`).click();
-      await expect(page.getByText('Likes: 1')).toBeVisible({ timeout: 15000 });
+
+        // Wait for the likes count to change from the initial value
+      await expect(async () => {
+        const newLikesText = await page.getByText('Likes:', { exact: false }).textContent();
+        expect(newLikesText).not.toEqual(initialLikesText);
+      }).toPass({ timeout: 15000 });
+
+      await expect(page.getByText('Likes: 1')).toBeVisible({ timeout: 5000 });
     });
+
 
     test('a blog can be deleted by its creator', async ({ page }) => {
       await createBlog(page, 'Delete Test', 'Delete Author', 'http://deletetest.com');
@@ -94,25 +106,35 @@ describe('Blog app', () => {
       const blogB = await createBlog(page, 'Blog B', 'Author B', 'http://blogb.com');
       const blogC = await createBlog(page, 'Blog C', 'Author C', 'http://blogc.com');
 
-      // Open blog A details and like it twice
-      await page.getByTestId('blog-title').filter({ hasText: 'Blog A Author A' }).getByTestId('view-toggle').click();
+      // Like blog A twice
+      await page.getByTestId('blog-title').filter({ hasText: 'Blog A' }).getByTestId('view-toggle').click();
       await page.getByTestId(`like-button-${blogA.id}`).click();
-      await page.waitForTimeout(1000); // Give time for the update to process
+      await expect(page.getByText('Likes: 1')).toBeVisible({ timeout: 5000 });
       await page.getByTestId(`like-button-${blogA.id}`).click();
-      await page.waitForTimeout(1000); // Give time for the update to process
+      await expect(page.getByText('Likes: 2')).toBeVisible({ timeout: 5000 });
 
-      // Open blog B details and like it twice
-      await page.getByTestId('blog-title').filter({ hasText: 'Blog B Author B' }).getByTestId('view-toggle').click();
+      // Like blog B once
+      await page.getByTestId('blog-title').filter({ hasText: 'Blog B' }).getByTestId('view-toggle').click();
       await page.getByTestId(`like-button-${blogB.id}`).click();
-      await page.waitForTimeout(1000); // Give time for the update to process
+      await expect(page.getByText('Likes: 1')).toBeVisible({ timeout: 5000 });
 
-      // Refresh the page to see the sorted list
+      // Reload the page to see the sorted list
       await page.reload();
-
+      
+      // Wait for blogs to be loaded after refresh
+      await expect(page.getByTestId('blog-title').first()).toBeVisible({ timeout: 5000 });
+      
+      // Get all blog elements after they're loaded
       const blogElements = await page.getByTestId('blog-title').all();
-      expect(await blogElements[0].textContent()).toContain('Blog A Author A');
-      expect(await blogElements[1].textContent()).toContain('Blog B Author B');
-      expect(await blogElements[2].textContent()).toContain('Blog C Author C');
+      
+      // Make sure we have the expected number of blogs
+      expect(blogElements.length).toBeGreaterThanOrEqual(3);
+      
+      // Check the ordering
+      const titles = await Promise.all(blogElements.map(element => element.textContent()));
+      expect(titles[0]).toContain('Blog A');
+      expect(titles[1]).toContain('Blog B');
+      expect(titles[2]).toContain('Blog C');
     });
   });
 });
